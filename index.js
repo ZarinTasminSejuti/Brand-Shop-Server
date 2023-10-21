@@ -5,8 +5,15 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// // Middleware
+// const corsConfig = {
+//   origin: '',
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE']
+// }
+// app.use(cors(corsConfig))
+// app.options("", cors(corsConfig))
+app.use(cors())
 app.use(express.json());
 
 
@@ -23,11 +30,8 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-
     const productCollection = client.db('carsDB').collection("cars")
-
+    const myCartCollection = client.db('carsDB').collection("myCart")
 
     app.get('/addProduct', async (req, res) => {
       const pointer = productCollection.find();
@@ -42,13 +46,9 @@ async function run() {
       const result = await productCollection.insertOne(newProduct);
       res.send(result); 
 })
-
+   
     
-    
-    //my cart section
-const myCartCollection = client.db('carsDB').collection("myCart")
-
-
+//my cart section
 app.get('/myCart', async (req, res) => {
   const pointer = myCartCollection.find();
   const result = await pointer.toArray();
@@ -62,10 +62,7 @@ app.post('/myCart', async (req, res) => {
   res.send(result); 
 })
    
-    
-    
-    
-    
+
     
 //Delete
 app.delete('/myCart/:itemId', async (req, res) => {
@@ -76,60 +73,56 @@ app.delete('/myCart/:itemId', async (req, res) => {
   res.send(result);
 });
     
+
     
+//update operation
+app.get('/updateProduct/:_id', async (req, res) => {  
+  const updateProductId = req.params._id;
+  const idObject = new ObjectId(updateProductId)
+  const result = await productCollection.findOne( idObject );
+  res.send(result); 
+  console.log(idObject);
+})
     
-    //update operation
-    app.get('/updateProduct/:_id', async (req, res) => {  
-      const updateProductId = req.params._id;
-      const idObject = new ObjectId(updateProductId)
-      const result = await productCollection.findOne( idObject );
-      res.send(result); 
-      console.log(idObject);
-    })
-    
 
-    app.put('/updateProduct/:_id', async (req, res) => {
-      const updateId = req.params._id;
-      const updateCar = req.body;
-      const filter = {_id: new ObjectId(updateId)}
-      const options = { upsert: true };
-      const updateCarElement = {
-        $set: {
-          productName: updateCar.productName,
-          brandName: updateCar.brandName,
-          type: updateCar.type,
-          price: updateCar.price,
-          productDescription: updateCar.productDescription,
-          productRating: updateCar.productRating,
-          imageUrl: updateCar.imageUrl,
-          userEmail: updateCar.userEmail
-        }
-      }
-   
-  const result = await myCartCollection.updateOne(filter, updateCarElement, options)
-      res.send(result); 
-      console.log(result);
-   })
-
-
-
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+app.put('/updateProduct/:_id', async (req, res) => {
+  const updateId = req.params._id;
+  const updateCar = req.body;
+  console.log(updateCar);
+  const filter = {_id: new ObjectId(updateId)}
+  const options = { upsert: true };
+  const updateCarElement = {
+    $set: {
+      productName: updateCar.productName,
+      brandName: updateCar.brandName,
+      type: updateCar.type,
+      price: updateCar.price,
+      description: updateCar.description,
+      rating: updateCar.rating,
+      image: updateCar.image,
+      userEmail: updateCar.userEmail
+    }
   }
+    
+
+const result = await productCollection.updateOne(filter, updateCarElement, options)
+  res.send(result); 
+  console.log(result);
+})
+
+
+
+// Send a ping to confirm a successful connection
+await client.db("admin").command({ ping: 1 });
+console.log("Pinged your deployment. You successfully connected to MongoDB!");
+} finally {
+// Ensures that the client will close when you finish/error
+// await client.close();
+}
 }
 run().catch(console.dir);
 
 
-
-
-
-app.get('/', (req, res) => {
-    res.send('Brand Shop server is running');
-});
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
