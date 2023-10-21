@@ -102,12 +102,13 @@ app.delete('/myCart/:itemId', async (req, res) => {
           productDescription: updateCar.productDescription,
           productRating: updateCar.productRating,
           imageUrl: updateCar.imageUrl,
-          
+          userEmail: updateCar.userEmail
         }
       }
    
   const result = await myCartCollection.updateOne(filter, updateCarElement, options)
-     res.send(result); 
+      res.send(result); 
+      console.log(result);
    })
 
 
