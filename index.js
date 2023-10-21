@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -61,10 +61,54 @@ app.post('/myCart', async (req, res) => {
   const result = await myCartCollection.insertOne(newCart);
   res.send(result); 
 })
+   
     
     
+    
+    
+    
+//Delete
+app.delete('/myCart/:itemId', async (req, res) => {
+  const itemId = req.params.itemId;
+  const idObject = new ObjectId(itemId)
+  console.log(itemId);
+  const result = await myCartCollection.deleteOne({ _id: idObject });
+  res.send(result);
+});
+    
+    
+    
+    //update operation
+    app.get('/updateProduct/:_id', async (req, res) => {  
+      const updateProductId = req.params._id;
+      const idObject = new ObjectId(updateProductId)
+      const result = await productCollection.findOne( idObject );
+      res.send(result); 
+      console.log(idObject);
+    })
     
 
+    app.put('/updateProduct/:_id', async (req, res) => {
+      const updateId = req.params._id;
+      const updateCar = req.body;
+      const filter = {_id: new ObjectId(updateId)}
+      const options = { upsert: true };
+      const updateCarElement = {
+        $set: {
+          productName: updateCar.productName,
+          brandName: updateCar.brandName,
+          type: updateCar.type,
+          price: updateCar.price,
+          productDescription: updateCar.productDescription,
+          productRating: updateCar.productRating,
+          imageUrl: updateCar.imageUrl,
+          
+        }
+      }
+   
+  const result = await myCartCollection.updateOne(filter, updateCarElement, options)
+     res.send(result); 
+   })
 
 
 
