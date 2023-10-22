@@ -6,14 +6,14 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // // Middleware
-// const corsConfig = {
-//   origin: '',
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE']
-// }
-// app.use(cors(corsConfig))
-// app.options("", cors(corsConfig))
-app.use(cors())
+const corsConfig = {
+  origin: '',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+}
+app.use(cors(corsConfig))
+app.options("", cors(corsConfig))
+// app.use(cors())
 app.use(express.json());
 
 
@@ -37,14 +37,14 @@ async function run() {
       const pointer = productCollection.find();
       const result = await pointer.toArray();
       res.send(result); 
-})
+}) 
 
 
-    app.post('/addProduct', async (req, res) => {
-      const newProduct = req.body;
-      console.log(newProduct);
-      const result = await productCollection.insertOne(newProduct);
-      res.send(result); 
+app.post('/addProduct', async (req, res) => {
+  const newProduct = req.body;
+  console.log(newProduct);
+  const result = await productCollection.insertOne(newProduct);
+  res.send(result); 
 })
    
     
@@ -113,7 +113,7 @@ const result = await productCollection.updateOne(filter, updateCarElement, optio
 
 
 // Send a ping to confirm a successful connection
-await client.db("admin").command({ ping: 1 });
+// await client.db("admin").command({ ping: 1 });
 console.log("Pinged your deployment. You successfully connected to MongoDB!");
 } finally {
 // Ensures that the client will close when you finish/error
@@ -127,3 +127,4 @@ run().catch(console.dir);
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
 });
+
